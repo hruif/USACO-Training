@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1586147826 source:c:\github\usaco-training\beads\main.cpp
+	<iostream>
+	<fstream>
+
+1586148362 source:c:\github\usaco-training\beads3\main.cpp
+	<iostream>
+	<fstream>
+

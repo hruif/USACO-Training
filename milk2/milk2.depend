@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1586584781 source:c:\github\usaco-training\milk2\main.cpp
+	<fstream>
+	<string.h>
+	<stdio.h>
+

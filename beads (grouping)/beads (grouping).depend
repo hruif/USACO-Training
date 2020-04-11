@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1586473842 source:c:\github\usaco-training\beads (grouping)\main.cpp
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<algorithm>
+

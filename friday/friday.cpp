@@ -13,8 +13,8 @@ int currentNameDay = 2;
 using namespace std;
 
 void checkFor13th(int month, int months[]) {
-	for (int i = 0; i < months[month]; i++) {
-		if (i == 12) {
+	for (int i = 1; i <= months[month]; i++) {
+		if (i == 13) {
 			nameDays[currentNameDay]++;
 		}
 		currentNameDay++;
