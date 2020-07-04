@@ -1,0 +1,127 @@
+/*
+ID: ruifanl1
+TASK: ditch
+LANG: C++
+*/
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <climits>
+
+using namespace std;
+
+int N, M;
+vector<vector<int>> intersections, flowRates;
+
+int findMin(int a, int b) {
+	if (a == -1) {
+		return b;
+	}
+	if (b == -1) {
+		return a;
+	}
+	return a < b ? a : b;
+}
+
+int findAns() {
+	int sink = M - 1;
+	vector<vector<int>> usedFlowRates = flowRates;
+	vector<int> flow(M), parent(M);
+	vector<bool> visited(M);
+
+
+	int totalFlow = 0;
+	while (true) {
+		for (int i = 0; i < M; i++) {
+			parent[i] = -1;
+			flow[i] = 0;
+			visited[i] = false;
+		}
+		flow[0] = INT_MAX;
+
+		int index;
+		while (true) {
+			int max = 0;
+			int maxloc = -1;
+
+			for (int i = 0; i < M; i++) {
+				if (flow[i] > max && !visited[i]) {
+					max = flow[i];
+					maxloc = i;
+				}
+			}
+			index = maxloc;
+
+			if (maxloc == -1) {
+				break;
+			}
+			if (maxloc == sink) {
+				break;
+			}
+			visited[maxloc] = true;
+
+			for (int i = 0; i < intersections[maxloc].size(); i++) {
+				int next = intersections[maxloc][i];
+				if (flow[next] < findMin(max, usedFlowRates[maxloc][next])) {
+					parent[next] = maxloc;
+					flow[next] = findMin(max, usedFlowRates[maxloc][next]);
+				}
+			}
+		}
+		if (index == -1) {
+			break;
+		}
+		int pathFlow = flow[sink];
+		totalFlow += pathFlow;
+
+		int current = sink;
+		while (current != 0) {
+			int next = parent[current];
+			usedFlowRates[next][current] -= pathFlow;
+			usedFlowRates[current][next] += pathFlow;
+			int interLen = intersections[current].size();
+			bool hasNext = false;
+			for (int i = 0; i < interLen; i++) {
+				if (intersections[current][i] == next) {
+					hasNext = true;
+					break;
+				}
+			}
+			if (!hasNext) {
+				intersections[current].push_back(next);
+			}
+			interLen = intersections[next].size();
+			hasNext = false;
+			for (int i = 0; i < interLen; i++) {
+				if (intersections[next][i] == current) {
+					hasNext = true;
+					break;
+				}
+			}
+			if (!hasNext) {
+				intersections[next].push_back(current);
+			}
+			current = next;
+		}
+	}
+	return totalFlow;
+}
+
+int main() {
+	ifstream fin("ditch.in");
+	fin >> N >> M;
+	flowRates.resize(M, vector<int>(M, 0));
+	intersections.resize(M + 1);
+	for (int i = 0; i < N; i++) {
+		int S, E, C;
+		fin >> S >> E >> C;
+		intersections[S - 1].push_back(E - 1);
+		flowRates[S - 1][E - 1] = C;
+	}
+
+	int ans = findAns();
+
+	ofstream fout("ditch.out");
+	fout << ans << '\n';
+}
