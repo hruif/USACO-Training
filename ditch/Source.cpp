@@ -1,135 +1,135 @@
 /*
 ID: ruifanl1
-TASK: ditch
+TASK: job
 LANG: C++
 */
 
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <climits>
-#include <algorithm>
 
 using namespace std;
 
-int N, M;
-vector<vector<int>> intersections, flowRates;
+int N, M1, M2;
+vector<int> A, B;
+vector<int> intermediateTimes, outputTimes;
 
-int findMin(int a, int b) {
-	if (a == -1) {
-		return b;
+void order() {
+	for (int i = 0; i < B.size() - 1; i++) {
+		for (int j = i + 1; j < B.size(); j++) {
+			if (B[i] < B[j]) {
+				int tmp = B[i];
+				B[i] = B[j];
+				B[j] = tmp;
+			}
+		}
 	}
-	if (b == -1) {
-		return a;
-	}
-	return a < b ? a : b;
 }
 
-int findAns() {
-	int source = 0;
-	int sink = M - 1;
-	vector<vector<int>> capacity = flowRates;
-	vector<int> flow(M);
-	vector<int> prevnode(M);
-	vector<bool> visited(M);
+void findOutput(int time, vector<int>& canStarts) {
 
-	int totalflow = 0;
+}
 
-	int c = 0;
-	while (true) {
-
-		int maxflow = 0;
-		int maxloc = -1;
-
-	// find path with highest capacity from
-	// source to sink
-	// uses a modified djikstra's algorithm
-		for (int i = 0; i < M; i++) {
-			prevnode[i] = -1;
-			flow[i] = 0;
-			visited[i] = false;
-		}
-		flow[source] = INT_MAX;
-
+void findAns() {
+	vector<int> processed(N * 20 + 1, 0);
+	for (int i = 0; i < A.size(); i++) {
+		int time = 1;
+		int timeNeeded = A[i];
+		int numProcessed;
 		while (true) {
-			maxflow = 0;
-			maxloc = -1;
-			c++;
-			if (c == 795) {
-				int a = 5;
+			numProcessed = time / timeNeeded;
+			if (time % timeNeeded == 0) {
+				processed[time]++;
 			}
-			// find the unvisited node with
-			// the ghiest capacity to it
-			for (int i = 0; i < M; i++) {
-				if (flow[i] > maxflow && !visited[i]) {
-					maxflow = flow[i];
-					maxloc = i;
-				}
-			}
-			if (maxloc == -1) {
+			if (numProcessed == N) {
 				break;
 			}
-			if (maxloc == sink) {
-				break;
-			}
-			visited[maxloc] = true;
-			// updates its neighbors
-			for (int j = 0; j < intersections[maxloc].size(); j++) {
-				int i = intersections[maxloc][j];
-
-				if (flow[i] < min(maxflow, 
-						capacity[maxloc][i])) {
-					prevnode[i] = maxloc;
-					flow[i] = min(maxflow,
-							capacity[maxloc][i]);
-				}
-			}
-		}
-
-		if (maxloc == -1) {	// no path
-			break;
-		}
-		
-		int pathcapacity = flow[sink];
-		totalflow = totalflow + pathcapacity;
-
-	// add that flow to the network,
-	// update capacity appropriately
-		int curnode = sink;
-			// for each arc, prevnode(curnode),
-			// curnode on path:
-		while (curnode != source) {
-			int nextnode = prevnode[curnode];
-			capacity[nextnode][curnode] =
-				capacity[nextnode][curnode] -
-									pathcapacity;
-			capacity[curnode][nextnode] =
-				capacity[curnode][nextnode] +
-									pathcapacity;
-			curnode = nextnode;
+			time++;
 		}
 	}
+	int index = 0;
 
-	return totalflow;
+	vector<int> canStarts;
+	for (int i = 0; i < N; i++) {
+		while (processed[index] == 0) {
+			index++;
+		}
+		intermediateTimes.push_back(index);
+		canStarts.push_back(index);
+		processed[index]--;
+	}
+	processed.clear();
+	processed.resize(N * 20 + index + 1, 0);
+	int overlap = 0;
+	vector<int> starts(N * 20 + index + 1, 0);
+	for (int i = 0; i < B.size(); i++) {
+		int time = 1;
+		int timeNeeded = B[i];
+		int lastTime = 0;
+		int numProcessed = 0;
+		while (true) {
+			int recorded = intermediateTimes[numProcessed];
+			bool overlapped = false;
+
+			if (recorded <= lastTime) {
+				recorded = lastTime;
+			}
+			else {
+				overlap++;
+				overlapped = true;
+			}
+			if (time - recorded >= timeNeeded) {
+				if (numProcessed == 0) {
+					if (canStarts[time - timeNeeded] != 0 && starts[time - timeNeeded] >= canStarts[time - timeNeeded]) {
+						time++;
+						continue;
+					}
+					else {
+						starts[time - timeNeeded]++;
+					}
+				}
+				processed[time]++;
+				lastTime = time;
+				numProcessed++;
+			}
+			else {
+				if (overlapped) {
+					overlap--;
+				}
+			}
+			if (numProcessed == N) {
+				break;
+			}
+			time++;
+		}
+	}
+	for (int i = 0; i < N; i++) {
+		int index = 0;
+		while (processed[index] == 0) {
+			index++;
+		}
+		outputTimes.push_back(index);
+		processed[index]--;
+	}
 }
 
 int main() {
-	ifstream fin("ditch.in");
-	fin >> N >> M;
-	flowRates.resize(M, vector<int>(M, 0));
-	intersections.resize(M + 1);
-	for (int i = 0; i < N; i++) {
-		int S, E, C;
-		fin >> S >> E >> C;
-		S--;
-		E--;
-		intersections[S].push_back(E);
-		intersections[E].push_back(S);
-		flowRates[S][E] += C;
+	ifstream fin("job.in");
+	fin >> N >> M1 >> M2;
+	for (int i = 0; i < M1; i++) {
+		int tmp;
+		fin >> tmp;
+		A.push_back(tmp);
+	}
+	for (int i = 0; i < M2; i++) {
+		int tmp;
+		fin >> tmp;
+		B.push_back(tmp);
 	}
 
-	int ans = findAns();
+	order();
+	findAns();
 
-	ofstream fout("ditch.out");
-	fout << ans << '\n';
+	ofstream fout("job.out");
+	fout << intermediateTimes.back() << ' ' << outputTimes.back() << '\n';
 }
